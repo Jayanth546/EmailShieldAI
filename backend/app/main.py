@@ -1,32 +1,45 @@
 from fastapi import FastAPI
 
+from app.schemas.email_schema import EmailRequest
+from app.services.email_analysis_service import EmailAnalysisService
+
 app = FastAPI(
     title="EmailShield AI",
-    description="AI-Powered Email Spam & Phishing Detection System",
-    version="1.0.0"
+    version="1.0"
 )
+
+service = EmailAnalysisService()
 
 
 @app.get("/")
-def home():
+def root():
     return {
-        "project": "EmailShield AI",
-        "version": "1.0.0",
-        "status": "Running"
+        "message": "Welcome to EmailShield AI"
     }
 
 
 @app.get("/health")
 def health():
     return {
-        "status": "Healthy"
+        "status": "healthy"
     }
 
 
-@app.get("/about")
-def about():
-    return {
-        "developer": "Cyber Hacker",
-        "project": "EmailShield AI",
-        "framework": "FastAPI"
+@app.post("/analyze")
+def analyze_email(request: EmailRequest):
+
+    parsed_email = {
+        "from": request.from_,
+        "message_id": request.message_id,
+        "reply_to": request.reply_to,
+        "authentication_results": request.authentication_results,
+        "received_spf": request.received_spf,
+        "dkim_signature": request.dkim_signature,
+        "body": request.body,
+        "urls": request.urls,
+        "attachments": request.attachments,
     }
+
+    result = service.analyze(parsed_email)
+
+    return result
