@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# Generated reports
+*.pdf
+
+# SQLite (for next phase)
+*.db
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env

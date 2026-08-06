@@ -2,10 +2,11 @@ from fastapi import FastAPI
 
 from app.schemas.email_schema import EmailRequest
 from app.services.email_analysis_service import EmailAnalysisService
+from app.api.report_routes import router as report_router
 
 app = FastAPI(
     title="EmailShield AI",
-    version="1.0"
+    version="1.0",
 )
 
 service = EmailAnalysisService()
@@ -43,3 +44,7 @@ def analyze_email(request: EmailRequest):
     result = service.analyze(parsed_email)
 
     return result
+
+
+# Register Report API
+app.include_router(report_router)

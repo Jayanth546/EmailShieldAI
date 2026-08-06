@@ -6,7 +6,7 @@ from app.analyzers.authentication_analyzer import AuthenticationAnalyzer
 
 from app.services.risk_engine import RiskEngine
 from app.utils.pdf_generator import PDFGenerator
-
+from app.database.db_service import DatabaseService
 
 class EmailAnalysisService:
 
@@ -16,8 +16,10 @@ class EmailAnalysisService:
         self.body = BodyAnalyzer()
         self.attachment = AttachmentAnalyzer()
         self.authentication = AuthenticationAnalyzer()
+
         self.risk = RiskEngine()
         self.pdf = PDFGenerator()
+        self.db = DatabaseService()
 
     def analyze(self, email):
 
@@ -66,9 +68,20 @@ class EmailAnalysisService:
         }
 
         # Generate PDF report
+        pdf_path = "email_report.pdf"
         self.pdf.generate(
             result,
             "email_report.pdf"
         )
+
+ # Save report to database
+        report_id = self.db.save_report(
+            email,
+            result,
+            pdf_path,
+        )
+
+        # Add report ID to response
+        result["report_id"] = report_id
 
         return result
