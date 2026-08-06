@@ -5,6 +5,7 @@ from app.analyzers.attachment_analyzer import AttachmentAnalyzer
 from app.analyzers.authentication_analyzer import AuthenticationAnalyzer
 
 from app.services.risk_engine import RiskEngine
+from app.utils.pdf_generator import PDFGenerator
 
 
 class EmailAnalysisService:
@@ -16,25 +17,32 @@ class EmailAnalysisService:
         self.attachment = AttachmentAnalyzer()
         self.authentication = AuthenticationAnalyzer()
         self.risk = RiskEngine()
+        self.pdf = PDFGenerator()
 
     def analyze(self, email):
 
+        # Analyze email header
         header_result = self.header.analyze(email)
 
+        # Analyze URLs
         url_result = self.url.analyze(
             email.get("urls", [])
         )
 
+        # Analyze email body
         body_result = self.body.analyze(
             email.get("body", "")
         )
 
+        # Analyze attachments
         attachment_result = self.attachment.analyze(
             email.get("attachments", [])
         )
 
+        # Analyze authentication
         authentication_result = self.authentication.analyze(email)
 
+        # Calculate overall risk
         risk_result = self.risk.analyze(
             header_result,
             url_result,
@@ -43,17 +51,24 @@ class EmailAnalysisService:
             authentication_result,
         )
 
-        return {
+        # Final result
+        result = {
             "header": header_result,
             "url": url_result,
             "body": body_result,
             "attachment": attachment_result,
             "authentication": authentication_result,
 
-            # Risk Engine output
             "risk": risk_result,
 
-            # Convenience fields for tests/API
             "risk_level": risk_result["verdict"].title(),
             "total_score": risk_result["total_score"],
         }
+
+        # Generate PDF report
+        self.pdf.generate(
+            result,
+            "email_report.pdf"
+        )
+
+        return result
