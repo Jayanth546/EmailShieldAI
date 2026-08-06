@@ -6,6 +6,7 @@ def main():
     email = parser.parse()
 
     print("\n===== Parsed Email =====")
+
     for key, value in email.items():
         print(f"{key}: {value}")
 

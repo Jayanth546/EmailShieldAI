@@ -13,6 +13,7 @@ class EmailParser:
 
         body = ""
         html = ""
+        urls = []
         attachments = []
 
         if message.is_multipart():
@@ -21,19 +22,22 @@ class EmailParser:
                 content_type = part.get_content_type()
                 disposition = part.get_content_disposition()
 
-                if content_type == "text/plain":
+                if disposition == "attachment":
+                    filename = part.get_filename()
+                    if filename:
+                        attachments.append(filename)
+
+                elif content_type == "text/plain":
                     body += part.get_content()
 
                 elif content_type == "text/html":
                     html += part.get_content()
 
-                elif disposition == "attachment":
-                    attachments.append(part.get_filename())
-
         else:
             body = message.get_content()
 
-        urls = re.findall(r"https?://[^\s]+", body)
+        # Extract URLs
+        urls = re.findall(r"https?://[^\s<>\"']+", body)
 
         return {
             "from": message.get("From"),
@@ -43,6 +47,21 @@ class EmailParser:
             "message_id": message.get("Message-ID"),
             "reply_to": message.get("Reply-To"),
             "return_path": message.get("Return-Path"),
+
+            # NEW
+            "authentication_results": message.get(
+                "Authentication-Results"
+            ),
+            "received_spf": message.get(
+                "Received-SPF"
+            ),
+            "dkim_signature": message.get(
+                "DKIM-Signature"
+            ),
+            "received": message.get_all(
+                "Received", []
+            ),
+
             "body": body,
             "html": html,
             "urls": urls,
