@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 
+from app.api.auth_routes import router as auth_router
+from app.api.report_routes import router as report_router
 from app.schemas.email_schema import EmailRequest
 from app.services.email_analysis_service import EmailAnalysisService
-from app.api.report_routes import router as report_router
+
 
 app = FastAPI(
     title="EmailShield AI",
@@ -48,3 +50,6 @@ def analyze_email(request: EmailRequest):
 
 # Register Report API
 app.include_router(report_router)
+
+# Register Authentication API
+app.include_router(auth_router)

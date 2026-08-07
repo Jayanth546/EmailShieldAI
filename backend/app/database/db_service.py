@@ -1,5 +1,6 @@
 from app.database.database import SessionLocal
 from app.models.email_report import EmailReport
+from app.models.user import User
 
 
 class DatabaseService:
@@ -42,6 +43,51 @@ class DatabaseService:
             return (
                 db.query(EmailReport)
                 .filter(EmailReport.id == report_id)
+                .first()
+            )
+
+        finally:
+            db.close()
+
+    def create_user(self, username, email, hashed_password):
+        db = SessionLocal()
+
+        try:
+            user = User(
+                username=username,
+                email=email,
+                hashed_password=hashed_password,
+            )
+
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+
+            return user
+
+        finally:
+            db.close()
+
+    def get_user_by_username(self, username):
+        db = SessionLocal()
+
+        try:
+            return (
+                db.query(User)
+                .filter(User.username == username)
+                .first()
+            )
+
+        finally:
+            db.close()
+
+    def get_user_by_email(self, email):
+        db = SessionLocal()
+
+        try:
+            return (
+                db.query(User)
+                .filter(User.email == email)
                 .first()
             )
 
