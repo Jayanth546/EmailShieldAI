@@ -21,7 +21,7 @@ class EmailAnalysisService:
         self.pdf = PDFGenerator()
         self.db = DatabaseService()
 
-    def analyze(self, email):
+    def analyze(self, user_id, email):
 
         # Analyze email header
         header_result = self.header.analyze(email)
@@ -71,11 +71,12 @@ class EmailAnalysisService:
         pdf_path = "email_report.pdf"
         self.pdf.generate(
             result,
-            "email_report.pdf"
+            pdf_path,
         )
 
  # Save report to database
         report_id = self.db.save_report(
+            user_id,
             email,
             result,
             pdf_path,

@@ -1,7 +1,8 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 
 from app.api.auth_routes import router as auth_router
 from app.api.report_routes import router as report_router
+from app.auth.dependencies import get_current_user
 from app.schemas.email_schema import EmailRequest
 from app.services.email_analysis_service import EmailAnalysisService
 
@@ -29,8 +30,10 @@ def health():
 
 
 @app.post("/analyze")
-def analyze_email(request: EmailRequest):
-
+def analyze_email(
+    request: EmailRequest,
+    current_user=Depends(get_current_user),
+):
     parsed_email = {
         "from": request.from_,
         "message_id": request.message_id,
@@ -43,7 +46,10 @@ def analyze_email(request: EmailRequest):
         "attachments": request.attachments,
     }
 
-    result = service.analyze(parsed_email)
+    result = service.analyze(
+        current_user.id,
+        parsed_email,
+    )      
 
     return result
 

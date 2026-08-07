@@ -1,10 +1,11 @@
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class EmailRequest(BaseModel):
-    from_: str = ""
+    from_: str =Field(default="", alias="from")
+
     message_id: Optional[str] = None
     reply_to: Optional[str] = None
 

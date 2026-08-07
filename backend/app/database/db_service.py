@@ -5,11 +5,12 @@ from app.models.user import User
 
 class DatabaseService:
 
-    def save_report(self, email, result, report_path):
+    def save_report(self, user_id, email, result, report_path):
         db = SessionLocal()
 
         try:
             report = EmailReport(
+                user_id=user_id,
                 sender=email.get("from", ""),
                 message_id=email.get("message_id"),
                 body=email.get("body", ""),
@@ -27,11 +28,15 @@ class DatabaseService:
         finally:
             db.close()
 
-    def get_reports(self):
+    def get_reports(self, user_id):
         db = SessionLocal()
 
         try:
-            return db.query(EmailReport).all()
+            return (
+                db.query(EmailReport)
+                .filter(EmailReport.user_id == user_id)
+                .all()
+            )
 
         finally:
             db.close()
@@ -88,6 +93,19 @@ class DatabaseService:
             return (
                 db.query(User)
                 .filter(User.email == email)
+                .first()
+            )
+
+        finally:
+            db.close()
+
+    def get_user_by_id(self, user_id):
+        db = SessionLocal()
+
+        try:
+            return (
+                db.query(User)
+                .filter(User.id == user_id)
                 .first()
             )
 

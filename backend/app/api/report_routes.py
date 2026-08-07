@@ -1,5 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 
+from app.auth.dependencies import get_current_user
 from app.database.db_service import DatabaseService
 
 router = APIRouter()
@@ -8,8 +9,10 @@ db = DatabaseService()
 
 
 @router.get("/reports")
-def get_reports():
-    reports = db.get_reports()
+def get_reports(
+    current_user=Depends(get_current_user),
+):
+    reports = db.get_reports(current_user.id)
 
     return [
         {
@@ -25,13 +28,23 @@ def get_reports():
 
 
 @router.get("/reports/{report_id}")
-def get_report(report_id: int):
+def get_report(
+    report_id: int,
+    current_user=Depends(get_current_user),
+):
     report = db.get_report(report_id)
 
     if report is None:
         raise HTTPException(
             status_code=404,
             detail="Report not found",
+        )
+
+    # Ownership check
+    if report.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to access this report",
         )
 
     return {

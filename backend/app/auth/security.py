@@ -4,7 +4,11 @@ from pwdlib import PasswordHash
 from jose import jwt
 
 
-# Password hashing
+SECRET_KEY = "CHANGE_THIS_TO_A_LONG_RANDOM_SECRET_KEY"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+
 password_hash = PasswordHash.recommended()
 
 
@@ -22,12 +26,6 @@ def verify_password(
     )
 
 
-# JWT configuration
-SECRET_KEY = "change-this-secret-key"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
-
 def create_access_token(
     data: dict,
     expires_delta: timedelta | None = None,
@@ -42,9 +40,7 @@ def create_access_token(
             minutes=ACCESS_TOKEN_EXPIRE_MINUTES
         )
 
-    to_encode.update({
-        "exp": expire,
-    })
+    to_encode.update({"exp": expire})
 
     encoded_jwt = jwt.encode(
         to_encode,
