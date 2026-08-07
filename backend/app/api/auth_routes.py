@@ -1,8 +1,12 @@
 from fastapi import APIRouter, HTTPException
 
-from app.auth.security import hash_password
+from app.auth.security import (
+    hash_password,
+    verify_password,
+    create_access_token,
+)
 from app.database.db_service import DatabaseService
-from app.schemas.user_schema import UserRegister
+from app.schemas.user_schema import UserRegister, UserLogin, Token
 
 
 router = APIRouter(
@@ -57,4 +61,44 @@ def register_user(user: UserRegister):
             "username": new_user.username,
             "email": new_user.email,
         },
+    }
+
+
+@router.post("/login", response_model=Token)
+def login_user(user: UserLogin):
+
+    # Find user
+    existing_user = db.get_user_by_username(
+        user.username
+    )
+
+    if existing_user is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid username or password",
+        )
+
+    # Verify password
+    password_valid = verify_password(
+        user.password,
+        existing_user.hashed_password,
+    )
+
+    if not password_valid:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid username or password",
+        )
+
+    # Create JWT access token
+    access_token = create_access_token(
+        data={
+            "sub": str(existing_user.id),
+            "username": existing_user.username,
+        }
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
     }
