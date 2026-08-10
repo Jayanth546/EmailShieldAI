@@ -18,3 +18,4 @@ venv/
 
 # Environment
 .env
+email_report.txt
