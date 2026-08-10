@@ -8,6 +8,8 @@ from app.services.risk_engine import RiskEngine
 from app.utils.pdf_generator import PDFGenerator
 from app.database.db_service import DatabaseService
 
+from ml.prediction.spam_predictor import SpamPredictor
+
 
 class EmailAnalysisService:
 
@@ -18,6 +20,9 @@ class EmailAnalysisService:
         self.attachment = AttachmentAnalyzer()
         self.authentication = AuthenticationAnalyzer()
 
+        # ML spam predictor
+        self.spam_predictor = SpamPredictor()
+
         self.risk = RiskEngine()
         self.pdf = PDFGenerator()
         self.db = DatabaseService()
@@ -27,8 +32,11 @@ class EmailAnalysisService:
         Analyze an email and optionally save the report for a user.
 
         Supports both:
+
             service.analyze(email)
+
         and:
+
             service.analyze(email, user_id)
         """
 
@@ -66,8 +74,19 @@ class EmailAnalysisService:
         )
 
         # -----------------------------
-        # 6. Calculate overall risk
+        # 6. ML spam prediction
         # -----------------------------
+        spam_result = self.spam_predictor.predict(
+            email.get("body", "")
+        )
+
+        # -----------------------------
+        # 7. Calculate overall risk
+        # -----------------------------
+        #
+        # The existing RiskEngine is intentionally
+        # unchanged at this stage.
+        #
         risk_result = self.risk.analyze(
             header_result,
             url_result,
@@ -77,7 +96,7 @@ class EmailAnalysisService:
         )
 
         # -----------------------------
-        # 7. Build final result
+        # 8. Build final result
         # -----------------------------
         result = {
             "header": header_result,
@@ -85,13 +104,18 @@ class EmailAnalysisService:
             "body": body_result,
             "attachment": attachment_result,
             "authentication": authentication_result,
+
+            # ML result
+            "spam": spam_result,
+
+            # Existing risk result
             "risk": risk_result,
             "risk_level": risk_result["verdict"].title(),
             "total_score": risk_result["total_score"],
         }
 
         # -----------------------------
-        # 8. Generate PDF report
+        # 9. Generate PDF report
         # -----------------------------
         pdf_path = "email_report.pdf"
 
@@ -101,12 +125,14 @@ class EmailAnalysisService:
         )
 
         # -----------------------------
-        # 9. Save report to database
+        # 10. Save report to database
         # -----------------------------
         #
-        # Unit tests call analyze(email) without
-        # a user_id, so only save to the database
-        # when a user_id is provided.
+        # Unit tests call analyze(email)
+        # without a user_id.
+        #
+        # Therefore, only save to the database
+        # when user_id is provided.
         #
         if user_id is not None:
             report_id = self.db.save_report(

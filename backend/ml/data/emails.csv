@@ -1,0 +1,11 @@
+label,text
+ham,"Hello John, thank you for your email. Regards, Alice."
+ham,"Your meeting is scheduled for tomorrow at 10 AM."
+ham,"Please find the project report attached."
+ham,"Can you send me the updated document?"
+ham,"Thank you for your quick response."
+spam,"Congratulations! You won $5000. Click here immediately."
+spam,"URGENT! Verify your account password now."
+spam,"You have won a free iPhone. Claim your prize today."
+spam,"Your account will be suspended. Click this link immediately."
+spam,"Exclusive offer! Get free money now. Click here."
