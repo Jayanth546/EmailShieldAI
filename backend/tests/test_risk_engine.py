@@ -9,11 +9,11 @@ def test_risk_engine_without_ml():
     engine = RiskEngine()
 
     result = engine.analyze(
-        make_result(5),   # header
-        make_result(5),   # url
-        make_result(5),   # body
-        make_result(5),   # attachment
-        make_result(5),   # authentication
+        make_result(5),
+        make_result(5),
+        make_result(5),
+        make_result(5),
+        make_result(5),
     )
 
     assert result["rule_based_score"] == 25
@@ -115,3 +115,79 @@ def test_risk_score_is_capped_at_100():
     assert result["total_score"] == 100
     assert result["total_score"] <= 100
     assert result["verdict"] == "PHISHING"
+
+
+def test_risk_engine_includes_semantic_body_findings():
+    engine = RiskEngine()
+
+    body_result = {
+        "score": 10,
+        "issues": [
+            "Suspicious keyword found: 'click here'",
+        ],
+        "findings": [
+            {
+                "category": "suspicious_keyword",
+                "keyword": "click here",
+                "message": "Suspicious keyword found: 'click here'",
+                "score": 10,
+            },
+        ],
+        "semantic_findings": [
+            {
+                "category": "urgency",
+                "matches": ["immediately"],
+            },
+            {
+                "category": "financial_reward",
+                "matches": ["you won"],
+            },
+            {
+                "category": "call_to_action",
+                "matches": ["click here"],
+            },
+        ],
+    }
+
+    result = engine.analyze(
+        make_result(0),
+        make_result(0),
+        body_result,
+        make_result(0),
+        make_result(0),
+    )
+
+    assert result["total_score"] == 10
+    assert result["verdict"] == "SAFE"
+
+    assert "body" in result["details"]
+
+    assert (
+        result["details"]["body"]["semantic_findings"]
+        == body_result["semantic_findings"]
+    )
+
+
+def test_risk_engine_handles_body_without_semantic_findings():
+    engine = RiskEngine()
+
+    body_result = {
+        "score": 5,
+        "issues": [
+            "Some existing body issue",
+        ],
+    }
+
+    result = engine.analyze(
+        make_result(0),
+        make_result(0),
+        body_result,
+        make_result(0),
+        make_result(0),
+    )
+
+    assert result["rule_based_score"] == 5
+    assert result["total_score"] == 5
+    assert result["verdict"] == "SAFE"
+
+    assert result["details"]["body"] == body_result
