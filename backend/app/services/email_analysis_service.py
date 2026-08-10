@@ -14,24 +14,29 @@ from ml.prediction.spam_predictor import SpamPredictor
 class EmailAnalysisService:
 
     def __init__(self):
+        # Traditional security analyzers
         self.header = HeaderAnalyzer()
         self.url = URLAnalyzer()
         self.body = BodyAnalyzer()
         self.attachment = AttachmentAnalyzer()
         self.authentication = AuthenticationAnalyzer()
 
-        # ML spam predictor
-        self.spam_predictor = SpamPredictor()
-
+        # Risk engine
         self.risk = RiskEngine()
+
+        # PDF and database services
         self.pdf = PDFGenerator()
         self.db = DatabaseService()
 
+        # Machine-learning spam predictor
+        self.spam_predictor = SpamPredictor()
+
     def analyze(self, email, user_id=None):
         """
-        Analyze an email and optionally save the report for a user.
+        Analyze an email using traditional security analysis
+        and machine-learning spam prediction.
 
-        Supports both:
+        Supports:
 
             service.analyze(email)
 
@@ -40,64 +45,63 @@ class EmailAnalysisService:
             service.analyze(email, user_id)
         """
 
-        # -----------------------------
-        # 1. Analyze email header
-        # -----------------------------
+        # --------------------------------------------------
+        # 1. Header analysis
+        # --------------------------------------------------
         header_result = self.header.analyze(email)
 
-        # -----------------------------
-        # 2. Analyze URLs
-        # -----------------------------
+        # --------------------------------------------------
+        # 2. URL analysis
+        # --------------------------------------------------
         url_result = self.url.analyze(
             email.get("urls", [])
         )
 
-        # -----------------------------
-        # 3. Analyze email body
-        # -----------------------------
+        # --------------------------------------------------
+        # 3. Body analysis
+        # --------------------------------------------------
+        body_text = email.get("body", "")
+
         body_result = self.body.analyze(
-            email.get("body", "")
+            body_text
         )
 
-        # -----------------------------
-        # 4. Analyze attachments
-        # -----------------------------
+        # --------------------------------------------------
+        # 4. Attachment analysis
+        # --------------------------------------------------
         attachment_result = self.attachment.analyze(
             email.get("attachments", [])
         )
 
-        # -----------------------------
-        # 5. Analyze authentication
-        # -----------------------------
+        # --------------------------------------------------
+        # 5. Authentication analysis
+        # --------------------------------------------------
         authentication_result = self.authentication.analyze(
             email
         )
 
-        # -----------------------------
-        # 6. ML spam prediction
-        # -----------------------------
+        # --------------------------------------------------
+        # 6. Machine-learning spam prediction
+        # --------------------------------------------------
         spam_result = self.spam_predictor.predict(
-            email.get("body", "")
+            body_text
         )
 
-        # -----------------------------
-        # 7. Calculate overall risk
-        # -----------------------------
-        #
-        # The existing RiskEngine is intentionally
-        # unchanged at this stage.
-        #
+        # --------------------------------------------------
+        # 7. Traditional risk calculation
+        # --------------------------------------------------
         risk_result = self.risk.analyze(
             header_result,
             url_result,
             body_result,
             attachment_result,
             authentication_result,
+            spam_result,
         )
 
-        # -----------------------------
-        # 8. Build final result
-        # -----------------------------
+        # --------------------------------------------------
+        # 8. Combine ML result with security analysis
+        # --------------------------------------------------
         result = {
             "header": header_result,
             "url": url_result,
@@ -105,18 +109,19 @@ class EmailAnalysisService:
             "attachment": attachment_result,
             "authentication": authentication_result,
 
-            # ML result
+            # Machine-learning result
             "spam": spam_result,
 
-            # Existing risk result
+            # Traditional risk analysis
             "risk": risk_result,
+
             "risk_level": risk_result["verdict"].title(),
             "total_score": risk_result["total_score"],
         }
 
-        # -----------------------------
+        # --------------------------------------------------
         # 9. Generate PDF report
-        # -----------------------------
+        # --------------------------------------------------
         pdf_path = "email_report.pdf"
 
         self.pdf.generate(
@@ -124,16 +129,9 @@ class EmailAnalysisService:
             pdf_path,
         )
 
-        # -----------------------------
+        # --------------------------------------------------
         # 10. Save report to database
-        # -----------------------------
-        #
-        # Unit tests call analyze(email)
-        # without a user_id.
-        #
-        # Therefore, only save to the database
-        # when user_id is provided.
-        #
+        # --------------------------------------------------
         if user_id is not None:
             report_id = self.db.save_report(
                 user_id,
