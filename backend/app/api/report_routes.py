@@ -1,4 +1,7 @@
+from pathlib import Path
+
 from fastapi import APIRouter, HTTPException, Depends
+from fastapi.responses import FileResponse
 
 from app.auth.dependencies import get_current_user
 from app.database.db_service import DatabaseService
@@ -6,6 +9,8 @@ from app.database.db_service import DatabaseService
 router = APIRouter()
 
 db = DatabaseService()
+
+BASE_DIR = Path(__file__).resolve().parents[2]
 
 
 @router.get("/reports")
@@ -55,4 +60,86 @@ def get_report(
         "risk_level": report.risk_level,
         "total_score": report.total_score,
         "report_path": report.report_path,
+    }
+
+
+@router.get("/reports/{report_id}/pdf")
+def download_report_pdf(
+    report_id: int,
+    current_user=Depends(get_current_user),
+):
+    report = db.get_report(report_id)
+
+    if report is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Report not found",
+        )
+
+    # Ownership check
+    if report.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to access this report",
+        )
+
+    # Resolve the stored PDF path safely
+    report_path = Path(report.report_path)
+
+    if not report_path.is_absolute():
+        report_path = BASE_DIR / report_path
+
+    report_path = report_path.resolve()
+
+    # Make sure the resolved path remains inside the backend directory
+    try:
+        report_path.relative_to(BASE_DIR.resolve())
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid report path",
+        )
+
+    if not report_path.is_file():
+        raise HTTPException(
+            status_code=404,
+            detail="PDF report file not found",
+        )
+
+    return FileResponse(
+        path=report_path,
+        media_type="application/pdf",
+        filename=report_path.name,
+    )
+@router.delete("/reports/{report_id}")
+def delete_report(
+    report_id: int,
+    current_user=Depends(get_current_user),
+):
+    report = db.get_report(report_id)
+
+    if report is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Report not found",
+        )
+
+    # Ownership check
+    if report.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to delete this report",
+        )
+
+    deleted = db.delete_report(report_id)
+
+    if not deleted:
+        raise HTTPException(
+            status_code=404,
+            detail="Report not found",
+        )
+
+    return {
+        "message": "Report deleted successfully",
+        "report_id": report_id,
     }

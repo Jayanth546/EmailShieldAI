@@ -1,0 +1,35 @@
+EmailShield AI Report
+Risk Level: Phishing
+Total Score: 100
+
+Header Analysis
+Score: 10
+• Reply-To differs from From
+
+URL Analysis
+Score: 10
+• Insecure HTTP URL: http://paypa1-example.com/verify-account
+
+Body Analysis
+Score: 40
+• Suspicious keyword found: 'verify'
+• Suspicious keyword found: 'account'
+• Suspicious keyword found: 'urgent'
+• Suspicious keyword found: 'password'
+
+Attachment Analysis
+Score: 30
+• Dangerous executable attachment: invoice.exe
+
+Authentication Analysis
+Score: 90
+• SPF validation failed
+• SPF failed
+• DKIM failed
+
+Recommendation
+
+This email is highly likely to be a phishing attempt. Do not click any links, do not open attachments,
+and report the email immediately.
+
+

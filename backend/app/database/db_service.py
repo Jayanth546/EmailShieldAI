@@ -111,3 +111,24 @@ class DatabaseService:
 
         finally:
             db.close()
+
+def delete_report(self, report_id):
+    db = SessionLocal()
+
+    try:
+        report = (
+            db.query(EmailReport)
+            .filter(EmailReport.id == report_id)
+            .first()
+        )
+
+        if report is None:
+            return False
+
+        db.delete(report)
+        db.commit()
+
+        return True
+
+    finally:
+        db.close()
