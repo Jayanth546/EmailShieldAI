@@ -1,6 +1,7 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+import jwt
+from jwt import InvalidTokenError
 
 from app.auth.security import JWT_SECRET_KEY, ALGORITHM
 from app.database.db_service import DatabaseService
@@ -41,7 +42,7 @@ def get_current_user(
         except (TypeError, ValueError):
             raise credentials_exception
 
-    except JWTError:
+    except InvalidTokenError:
         raise credentials_exception
 
     user = db.get_user_by_id(user_id)
@@ -50,3 +51,4 @@ def get_current_user(
         raise credentials_exception
 
     return user
+

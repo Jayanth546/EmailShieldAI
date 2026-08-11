@@ -3,7 +3,7 @@ import os
 
 from dotenv import load_dotenv
 from pwdlib import PasswordHash
-from jose import jwt
+import jwt
 
 
 load_dotenv()
@@ -21,7 +21,6 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(
     os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
 )
 
-
 # Only allow the algorithm that the application is designed
 # and tested to use.
 ALLOWED_ALGORITHMS = {"HS256"}
@@ -32,13 +31,11 @@ if ALGORITHM not in ALLOWED_ALGORITHMS:
         f"Allowed algorithms: {sorted(ALLOWED_ALGORITHMS)}"
     )
 
-
 if not JWT_SECRET_KEY:
     raise RuntimeError(
         "JWT_SECRET_KEY is not configured. "
         "Set it in the environment or .env file."
     )
-
 
 # Reject obviously weak development secrets.
 if len(JWT_SECRET_KEY) < 32:
@@ -46,7 +43,6 @@ if len(JWT_SECRET_KEY) < 32:
         "JWT_SECRET_KEY is too short. "
         "Use a cryptographically random secret of at least 32 characters."
     )
-
 
 if ACCESS_TOKEN_EXPIRE_MINUTES <= 0:
     raise RuntimeError(
@@ -109,4 +105,3 @@ def create_access_token(
     )
 
     return encoded_jwt
-
