@@ -12,6 +12,10 @@ jobs:
   security-tests:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: backend
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -28,6 +32,13 @@ jobs:
         run: |
           python -m pip install -r requirements.txt
           python -m pip install pytest bandit pip-audit detect-secrets
+
+      - name: Verify critical dependencies
+        run: |
+          python -c "import reportlab; print('reportlab:', reportlab.Version)"
+          python -c "import joblib; print('joblib:', joblib.__version__)"
+          python -c "import httpx; print('httpx:', httpx.__version__)"
+          python -c "import jwt; print('PyJWT:', jwt.__version__)"
 
       - name: Run tests
         env:
