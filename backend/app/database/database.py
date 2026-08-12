@@ -1,7 +1,13 @@
+import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-DATABASE_URL = "sqlite:////app/data/emailshield.db"
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "sqlite:///emailshield.db",
+)
 
 engine = create_engine(
     DATABASE_URL,
@@ -27,6 +33,7 @@ def init_db():
 
 def get_db():
     db = SessionLocal()
+
     try:
         yield db
     finally:
