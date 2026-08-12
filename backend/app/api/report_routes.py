@@ -84,12 +84,42 @@ def download_report_pdf(
         )
 
     # Resolve the stored PDF path safely
+    reports_dir = Path("/app/reports").resolve()
+
     report_path = Path(report.report_path)
 
     if not report_path.is_absolute():
-        report_path = BASE_DIR / report_path
+        report_path = Path("/app") / report_path
 
     report_path = report_path.resolve()
+
+    # Ensure the PDF is inside /app/reports
+    try:
+        report_path.relative_to(reports_dir)
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid report path",
+        )
+
+    # Only allow PDF files
+    if report_path.suffix.lower() != ".pdf":
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid report file",
+        )
+
+    if not report_path.is_file():
+        raise HTTPException(
+            status_code=404,
+            detail="PDF report file not found",
+        )
+
+    return FileResponse(
+        path=report_path,
+        media_type="application/pdf",
+        filename=report_path.name,
+    )
 
     # Make sure the resolved path remains inside the backend directory
     try:
@@ -131,6 +161,30 @@ def delete_report(
             detail="You do not have permission to delete this report",
         )
 
+    # Delete PDF file first
+    if report.report_path:
+        report_path = Path(report.report_path)
+
+        # Only allow PDFs inside /app/reports
+        reports_dir = Path("/app/reports").resolve()
+
+        if not report_path.is_absolute():
+            report_path = Path("/app") / report_path
+
+        report_path = report_path.resolve()
+
+        try:
+            report_path.relative_to(reports_dir)
+        except ValueError:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid report path",
+            )
+
+        if report_path.is_file():
+            report_path.unlink()
+
+    # Delete database record
     deleted = db.delete_report(report_id)
 
     if not deleted:

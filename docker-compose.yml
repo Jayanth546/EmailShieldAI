@@ -1,0 +1,24 @@
+services:
+  emailshieldai:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+
+    image: emailshieldai:latest
+    container_name: emailshieldai
+
+    env_file:
+      - ./backend/.env
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - emailshield_data:/app/data
+      - emailshield_reports:/app/reports
+
+    restart: unless-stopped
+
+volumes:
+  emailshield_data:
+  emailshield_reports:

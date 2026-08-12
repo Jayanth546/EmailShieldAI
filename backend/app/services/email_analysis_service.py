@@ -10,6 +10,9 @@ from app.database.db_service import DatabaseService
 
 from ml.prediction.spam_predictor import SpamPredictor
 
+import uuid
+from pathlib import Path
+
 
 class EmailAnalysisService:
 
@@ -35,14 +38,6 @@ class EmailAnalysisService:
         """
         Analyze an email using traditional security analysis
         and machine-learning spam prediction.
-
-        Supports:
-
-            service.analyze(email)
-
-        and:
-
-            service.analyze(email, user_id)
         """
 
         # --------------------------------------------------
@@ -100,7 +95,7 @@ class EmailAnalysisService:
         )
 
         # --------------------------------------------------
-        # 8. Combine ML result with security analysis
+        # 8. Combine analysis results
         # --------------------------------------------------
         result = {
             "header": header_result,
@@ -108,25 +103,22 @@ class EmailAnalysisService:
             "body": body_result,
             "attachment": attachment_result,
             "authentication": authentication_result,
-
-            # Machine-learning result
             "spam": spam_result,
-
-            # Traditional risk analysis
             "risk": risk_result,
-
             "risk_level": risk_result["verdict"].title(),
             "total_score": risk_result["total_score"],
         }
 
         # --------------------------------------------------
-        # 9. Generate PDF report
+        # 9. Generate UNIQUE PDF report
         # --------------------------------------------------
-        pdf_path = "email_report.pdf"
+        report_filename = f"email_report_{uuid.uuid4().hex}.pdf"
+
+        pdf_path = Path("/app/reports") / report_filename
 
         self.pdf.generate(
             result,
-            pdf_path,
+            str(pdf_path),
         )
 
         # --------------------------------------------------
@@ -137,7 +129,7 @@ class EmailAnalysisService:
                 user_id,
                 email,
                 result,
-                pdf_path,
+                str(pdf_path),
             )
 
             result["report_id"] = report_id

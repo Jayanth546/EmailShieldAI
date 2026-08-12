@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-DATABASE_URL = "sqlite:///emailshield.db"
+DATABASE_URL = "sqlite:////app/data/emailshield.db"
 
 engine = create_engine(
     DATABASE_URL,

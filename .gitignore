@@ -47,6 +47,9 @@ dist/
 *.db
 *.sqlite3
 
+# Backups
+backups/
+
 # Temporary files
 *.tmp
 *.temp
