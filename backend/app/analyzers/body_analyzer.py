@@ -1,6 +1,9 @@
+from typing import ClassVar
+
+
 class BodyAnalyzer:
     # Words and phrases commonly found in phishing emails
-    SUSPICIOUS_KEYWORDS = {
+    SUSPICIOUS_KEYWORDS: ClassVar[set[str]] = {
         "urgent",
         "verify",
         "password",
@@ -14,7 +17,7 @@ class BodyAnalyzer:
     }
 
     # Generic greetings often used in phishing emails
-    GENERIC_GREETINGS = {
+    GENERIC_GREETINGS: ClassVar[set[str]] = {
         "dear customer",
         "dear user",
         "dear client",
@@ -24,8 +27,8 @@ class BodyAnalyzer:
     }
 
     # Semantic categories used for explainability.
-    # These categories DO NOT change the risk score.
-    SEMANTIC_CATEGORIES = {
+    # These categories do NOT change the risk score.
+    SEMANTIC_CATEGORIES: ClassVar[dict[str, set[str]]] = {
         "urgency": {
             "urgent",
             "immediately",
@@ -80,78 +83,55 @@ class BodyAnalyzer:
     }
 
     def analyze(self, body):
-        issues = []
-        findings = []
-        semantic_findings = []
-        score = 0
-
-        # Convert body to lowercase for case-insensitive matching
         body_lower = body.lower()
 
-        # --------------------------------
+        issues = []
+        score = 0
+
+        # Semantic findings must be a list of dictionaries.
+        semantic_findings = []
+
+        # --------------------------------------------------
         # Rule 1: Suspicious keywords
-        # --------------------------------
+        # --------------------------------------------------
         for keyword in self.SUSPICIOUS_KEYWORDS:
             if keyword in body_lower:
-                message = (
-                    f"Suspicious keyword found: '{keyword}'"
+                issues.append(
+                    f"Suspicious keyword: '{keyword}'"
                 )
-
-                issues.append(message)
-
-                findings.append({
-                    "category": "suspicious_keyword",
-                    "keyword": keyword,
-                    "message": message,
-                    "score": 10,
-                })
-
                 score += 10
 
-        # --------------------------------
+        # --------------------------------------------------
         # Rule 2: Generic greetings
-        # --------------------------------
+        # --------------------------------------------------
         for greeting in self.GENERIC_GREETINGS:
             if greeting in body_lower:
-                message = (
-                    f"Generic greeting detected: '{greeting}'"
-                )
-
-                issues.append(message)
-
-                findings.append({
-                    "category": "generic_greeting",
-                    "keyword": greeting,
-                    "message": message,
-                    "score": 15,
-                })
-
+                issues.append("Generic greeting detected")
                 score += 15
+                break
 
-        # --------------------------------
-        # Rule 3: Semantic categories
-        # --------------------------------
-        #
-        # These findings are explanatory only.
-        # They DO NOT modify the existing score.
-        #
+        # --------------------------------------------------
+        # Semantic findings
+        # --------------------------------------------------
+        # These findings are for explainability only.
+        # They do NOT affect the risk score.
         for category, phrases in self.SEMANTIC_CATEGORIES.items():
-            matched_phrases = []
+            matches = sorted(
+                phrase
+                for phrase in phrases
+                if phrase in body_lower
+            )
 
-            for phrase in phrases:
-                if phrase in body_lower:
-                    matched_phrases.append(phrase)
-
-            if matched_phrases:
-                semantic_findings.append({
-                    "category": category,
-                    "matches": sorted(matched_phrases),
-                })
+            if matches:
+                semantic_findings.append(
+                    {
+                        "category": category,
+                        "matches": matches,
+                    }
+                )
 
         return {
             "score": score,
             "issues": issues,
-            "findings": findings,
             "semantic_findings": semantic_findings,
         }
-

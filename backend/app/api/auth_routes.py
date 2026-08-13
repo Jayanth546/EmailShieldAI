@@ -1,13 +1,16 @@
+import json
+
 from fastapi import APIRouter, HTTPException, Request
+from pydantic import ValidationError
 
 from app.auth.security import (
+    create_access_token,
     hash_password,
     verify_password,
-    create_access_token,
 )
 from app.database.db_service import DatabaseService
-from app.schemas.user_schema import UserRegister, UserLogin, Token
 from app.middleware.security import LoginBruteForceMiddleware
+from app.schemas.user_schema import Token, UserLogin, UserRegister
 
 router = APIRouter(
     prefix="/auth",
@@ -81,19 +84,19 @@ async def login_user(request: Request):
     elif "application/json" in content_type:
         try:
             payload = await request.json()
-        except Exception:
+        except json.JSONDecodeError as exc:
             raise HTTPException(
                 status_code=422,
                 detail="Invalid JSON request body",
-            )
+            ) from exc
 
         try:
             login_data = UserLogin.model_validate(payload)
-        except Exception:
+        except ValidationError as exc:
             raise HTTPException(
                 status_code=422,
                 detail="Invalid login request",
-            )
+            ) from exc
 
         username = login_data.username
         password = login_data.password

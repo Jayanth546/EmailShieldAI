@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends
 
 from app.auth.dependencies import get_current_user
-from app.schemas.email_schema import EmailRequest, EmailAnalysisResponse
+from app.schemas.email_schema import EmailAnalysisResponse, EmailRequest
 from app.services.email_analysis_service import EmailAnalysisService
-
 
 router = APIRouter()
 
@@ -16,7 +15,7 @@ service = EmailAnalysisService()
 )
 def analyze_email(
     request: EmailRequest,
-    current_user=Depends(get_current_user),
+    current_user=Depends(get_current_user),  # noqa: B008
 ):
     parsed_email = {
         "from": request.from_,

@@ -1,12 +1,10 @@
 from pathlib import Path
 
 import pandas as pd
-
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import StratifiedKFold, cross_validate
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
-
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 

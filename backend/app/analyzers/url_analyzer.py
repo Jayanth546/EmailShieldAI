@@ -1,10 +1,11 @@
-from urllib.parse import urlparse
 import ipaddress
+from typing import ClassVar
+from urllib.parse import urlparse
 
 
 class URLAnalyzer:
     # Common URL shortener domains
-    SHORTENERS = {
+    SHORTENERS: ClassVar[set[str]] = {
         "bit.ly",
         "tinyurl.com",
         "t.co",
@@ -16,7 +17,7 @@ class URLAnalyzer:
     }
 
     # TLDs that may deserve additional scrutiny
-    SUSPICIOUS_TLDS = {
+    SUSPICIOUS_TLDS: ClassVar[set[str]] = {
         "zip",
         "xyz",
         "click",
@@ -61,6 +62,7 @@ class URLAnalyzer:
                 if tld in self.SUSPICIOUS_TLDS:
                     issues.append(f"Suspicious TLD detected: .{tld}")
                     score += 15
+
             # Rule 5: Excessive subdomains
             if hostname.count(".") > 3:
                 issues.append(

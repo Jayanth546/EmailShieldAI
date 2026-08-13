@@ -1,17 +1,15 @@
 from pathlib import Path
 
 import joblib
-import pandas as pd
 import matplotlib.pyplot as plt
-
+import pandas as pd
 from sklearn.metrics import (
+    ConfusionMatrixDisplay,
     accuracy_score,
     classification_report,
     confusion_matrix,
-    ConfusionMatrixDisplay,
 )
 from sklearn.model_selection import train_test_split
-
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 
@@ -93,7 +91,7 @@ def main():
     plt.savefig(output_path, dpi=150)
     plt.close()
 
-    print(f"\nConfusion matrix saved to:")
+    print("\nConfusion matrix saved to:")
     print(output_path)
 
 

@@ -1,6 +1,6 @@
+import re
 from email import policy
 from email.parser import BytesParser
-import re
 
 
 class EmailParser:

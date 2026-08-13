@@ -1,8 +1,9 @@
 import os
+from typing import ClassVar
 
 
 class AttachmentAnalyzer:
-    DANGEROUS_EXTENSIONS = {
+    DANGEROUS_EXTENSIONS: ClassVar[set[str]] = {
         ".exe",
         ".bat",
         ".cmd",
@@ -12,13 +13,13 @@ class AttachmentAnalyzer:
         ".ps1",
     }
 
-    MACRO_EXTENSIONS = {
+    MACRO_EXTENSIONS: ClassVar[set[str]] = {
         ".docm",
         ".xlsm",
         ".pptm",
     }
 
-    ARCHIVE_EXTENSIONS = {
+    ARCHIVE_EXTENSIONS: ClassVar[set[str]] = {
         ".zip",
         ".rar",
         ".7z",

@@ -1,9 +1,9 @@
+from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import (
-    SimpleDocTemplate,
     Paragraph,
+    SimpleDocTemplate,
     Spacer,
 )
-from reportlab.lib.styles import getSampleStyleSheet
 
 
 class PDFGenerator:

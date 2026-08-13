@@ -1,11 +1,10 @@
+import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-import jwt
 from jwt import InvalidTokenError
 
-from app.auth.security import JWT_SECRET_KEY, ALGORITHM
+from app.auth.security import ALGORITHM, JWT_SECRET_KEY
 from app.database.db_service import DatabaseService
-
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/auth/login"
