@@ -23,7 +23,8 @@ Base = declarative_base()
 
 
 def init_db():
-    # Import models here to avoid circular imports
+    # Import models so SQLAlchemy registers all tables
+    from app.models import email_report, user  # noqa: F401
 
     Base.metadata.create_all(bind=engine)
 
