@@ -1,3 +1,5 @@
+import pytest
+
 from ml.prediction.spam_predictor import SpamPredictor
 
 
@@ -20,19 +22,13 @@ def test_custom_threshold():
 
 
 def test_invalid_threshold_below_zero():
-    try:
+    with pytest.raises(ValueError):
         SpamPredictor(threshold=-0.1)
-        assert False
-    except ValueError:
-        pass
 
 
 def test_invalid_threshold_above_one():
-    try:
+    with pytest.raises(ValueError):
         SpamPredictor(threshold=1.1)
-        assert False
-    except ValueError:
-        pass
 
 
 def test_spam_email_prediction():
@@ -72,8 +68,5 @@ def test_empty_email_prediction():
 def test_non_string_email_raises_type_error():
     predictor = SpamPredictor()
 
-    try:
+    with pytest.raises(TypeError):
         predictor.predict(None)
-        assert False
-    except TypeError:
-        pass
