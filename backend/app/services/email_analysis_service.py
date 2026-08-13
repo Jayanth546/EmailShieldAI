@@ -13,6 +13,7 @@ from ml.prediction.spam_predictor import SpamPredictor
 import uuid
 from pathlib import Path
 
+from app.config import REPORTS_DIR
 
 class EmailAnalysisService:
 
@@ -114,7 +115,8 @@ class EmailAnalysisService:
         # --------------------------------------------------
         report_filename = f"email_report_{uuid.uuid4().hex}.pdf"
 
-        pdf_path = Path("/app/reports") / report_filename
+        REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+        pdf_path = REPORTS_DIR / report_filename
 
         self.pdf.generate(
             result,

@@ -5,12 +5,12 @@ from fastapi.responses import FileResponse
 
 from app.auth.dependencies import get_current_user
 from app.database.db_service import DatabaseService
+from app.config import REPORTS_DIR
+
 
 router = APIRouter()
 
 db = DatabaseService()
-
-BASE_DIR = Path(__file__).resolve().parents[2]
 
 
 @router.get("/reports")
@@ -83,9 +83,10 @@ def download_report_pdf(
             detail="You do not have permission to access this report",
         )
 
-    # Resolve the stored PDF path safely
-    reports_dir = Path("/app/reports").resolve()
+    # Resolve the configured reports directory
+    reports_dir = REPORTS_DIR.resolve()
 
+    # Resolve the stored PDF path safely
     report_path = Path(report.report_path)
 
     if not report_path.is_absolute():
@@ -93,7 +94,7 @@ def download_report_pdf(
 
     report_path = report_path.resolve()
 
-    # Ensure the PDF is inside /app/reports
+    # Ensure the PDF is inside the configured reports directory
     try:
         report_path.relative_to(reports_dir)
     except ValueError:
@@ -109,6 +110,7 @@ def download_report_pdf(
             detail="Invalid report file",
         )
 
+    # Verify that the PDF exists
     if not report_path.is_file():
         raise HTTPException(
             status_code=404,
@@ -121,26 +123,7 @@ def download_report_pdf(
         filename=report_path.name,
     )
 
-    # Make sure the resolved path remains inside the backend directory
-    try:
-        report_path.relative_to(BASE_DIR.resolve())
-    except ValueError:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid report path",
-        )
 
-    if not report_path.is_file():
-        raise HTTPException(
-            status_code=404,
-            detail="PDF report file not found",
-        )
-
-    return FileResponse(
-        path=report_path,
-        media_type="application/pdf",
-        filename=report_path.name,
-    )
 @router.delete("/reports/{report_id}")
 def delete_report(
     report_id: int,
@@ -165,20 +148,28 @@ def delete_report(
     if report.report_path:
         report_path = Path(report.report_path)
 
-        # Only allow PDFs inside /app/reports
-        reports_dir = Path("/app/reports").resolve()
+        # Resolve the configured reports directory
+        reports_dir = REPORTS_DIR.resolve()
 
         if not report_path.is_absolute():
             report_path = Path("/app") / report_path
 
         report_path = report_path.resolve()
 
+        # Prevent path traversal
         try:
             report_path.relative_to(reports_dir)
         except ValueError:
             raise HTTPException(
                 status_code=400,
                 detail="Invalid report path",
+            )
+
+        # Only delete PDF files
+        if report_path.suffix.lower() != ".pdf":
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid report file",
             )
 
         if report_path.is_file():
