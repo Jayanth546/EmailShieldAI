@@ -9,9 +9,9 @@ WORKDIR /app
 RUN useradd --create-home --shell /usr/sbin/nologin appuser
 
 COPY requirements.txt .
-RUN pip install --upgrade pip setuptools && \
+RUN pip install --no-cache-dir --upgrade pip "setuptools>=83.0.0" && \
     pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir --upgrade msgpack
+    pip install --no-cache-dir --upgrade "msgpack>=1.2.1" "setuptools>=83.0.0"
 
 COPY app ./app
 COPY ml ./ml
