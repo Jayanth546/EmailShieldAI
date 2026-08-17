@@ -11,10 +11,12 @@ RUN apt-get update && \
 RUN useradd --create-home --shell /usr/sbin/nologin appuser
 
 COPY requirements.txt .
+
 RUN pip install --no-cache-dir --upgrade pip "setuptools>=83.0.0" && \
     pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir --upgrade "msgpack>=1.2.1" "setuptools>=83.0.0"
-
+    pip install --no-cache-dir --upgrade "msgpack>=1.2.1" "setuptools>=83.0.0" && \
+    rm -f /usr/local/lib/python3.14/site-packages/pip/_vendor/bom.cdx.json
+ 
 COPY app ./app
 COPY ml ./ml
 
