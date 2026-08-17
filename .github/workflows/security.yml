@@ -17,7 +17,6 @@ jobs:
         working-directory: backend
 
     env:
-      JWT_SECRET_KEY: ci-test-secret-do-not-use-in-production
       JWT_ALGORITHM: HS256
       ACCESS_TOKEN_EXPIRE_MINUTES: 30
 
@@ -29,6 +28,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.14"
+
+      - name: Generate ephemeral CI JWT secret
+        run: echo "JWT_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')" >> "$GITHUB_ENV"
 
       - name: Upgrade pip
         run: python -m pip install --upgrade pip
