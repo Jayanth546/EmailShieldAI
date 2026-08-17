@@ -1,10 +1,10 @@
 import time
 from collections import defaultdict, deque
+from typing import ClassVar
 
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
-
 
 # ============================================================
 # Configuration
@@ -145,7 +145,7 @@ class LoginBruteForceMiddleware(BaseHTTPMiddleware):
     - Failed attempts are tracked per client IP.
     """
 
-    failed_attempts = defaultdict(deque)
+    failed_attempts: ClassVar[defaultdict] = defaultdict(deque)
 
     def __init__(self, app):
         super().__init__(app)

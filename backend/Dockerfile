@@ -1,18 +1,22 @@
 FROM python:3.14-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
-
 WORKDIR /app
+
+# Update Debian packages to security-fixed versions
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN useradd --create-home --shell /usr/sbin/nologin appuser
 
 COPY requirements.txt .
 
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
-
+RUN pip install --no-cache-dir --upgrade pip "setuptools>=83.0.0" && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir --upgrade "msgpack>=1.2.1" "setuptools>=83.0.0" && \
+    rm -f /usr/local/lib/python3.14/site-packages/pip/_vendor/bom.cdx.json
+ 
 COPY app ./app
 COPY ml ./ml
 

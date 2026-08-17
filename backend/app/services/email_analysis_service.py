@@ -1,19 +1,16 @@
-from app.analyzers.header_analyzer import HeaderAnalyzer
-from app.analyzers.url_analyzer import URLAnalyzer
-from app.analyzers.body_analyzer import BodyAnalyzer
+import uuid
+
 from app.analyzers.attachment_analyzer import AttachmentAnalyzer
 from app.analyzers.authentication_analyzer import AuthenticationAnalyzer
-
+from app.analyzers.body_analyzer import BodyAnalyzer
+from app.analyzers.header_analyzer import HeaderAnalyzer
+from app.analyzers.url_analyzer import URLAnalyzer
+from app.config import REPORTS_DIR
+from app.database.db_service import DatabaseService
 from app.services.risk_engine import RiskEngine
 from app.utils.pdf_generator import PDFGenerator
-from app.database.db_service import DatabaseService
-
 from ml.prediction.spam_predictor import SpamPredictor
 
-import uuid
-from pathlib import Path
-
-from app.config import REPORTS_DIR
 
 class EmailAnalysisService:
 

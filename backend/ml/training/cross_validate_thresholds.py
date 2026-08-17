@@ -1,18 +1,16 @@
 from pathlib import Path
 
 import pandas as pd
-
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import (
     accuracy_score,
+    f1_score,
     precision_score,
     recall_score,
-    f1_score,
 )
 from sklearn.model_selection import StratifiedKFold
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
-
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 

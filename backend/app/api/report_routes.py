@@ -1,12 +1,11 @@
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 
 from app.auth.dependencies import get_current_user
-from app.database.db_service import DatabaseService
 from app.config import REPORTS_DIR
-
+from app.database.db_service import DatabaseService
 
 router = APIRouter()
 
@@ -15,7 +14,7 @@ db = DatabaseService()
 
 @router.get("/reports")
 def get_reports(
-    current_user=Depends(get_current_user),
+    current_user=Depends(get_current_user),  # noqa: B008
 ):
     reports = db.get_reports(current_user.id)
 
@@ -35,7 +34,7 @@ def get_reports(
 @router.get("/reports/{report_id}")
 def get_report(
     report_id: int,
-    current_user=Depends(get_current_user),
+    current_user=Depends(get_current_user),  # noqa: B008
 ):
     report = db.get_report(report_id)
 
@@ -66,7 +65,7 @@ def get_report(
 @router.get("/reports/{report_id}/pdf")
 def download_report_pdf(
     report_id: int,
-    current_user=Depends(get_current_user),
+    current_user=Depends(get_current_user),  # noqa: B008
 ):
     report = db.get_report(report_id)
 
@@ -97,11 +96,11 @@ def download_report_pdf(
     # Ensure the PDF is inside the configured reports directory
     try:
         report_path.relative_to(reports_dir)
-    except ValueError:
+    except ValueError as exc:
         raise HTTPException(
             status_code=400,
             detail="Invalid report path",
-        )
+        ) from exc
 
     # Only allow PDF files
     if report_path.suffix.lower() != ".pdf":
@@ -127,7 +126,7 @@ def download_report_pdf(
 @router.delete("/reports/{report_id}")
 def delete_report(
     report_id: int,
-    current_user=Depends(get_current_user),
+    current_user=Depends(get_current_user),  # noqa: B008
 ):
     report = db.get_report(report_id)
 
@@ -159,11 +158,11 @@ def delete_report(
         # Prevent path traversal
         try:
             report_path.relative_to(reports_dir)
-        except ValueError:
+        except ValueError as exc:
             raise HTTPException(
                 status_code=400,
                 detail="Invalid report path",
-            )
+            ) from exc
 
         # Only delete PDF files
         if report_path.suffix.lower() != ".pdf":

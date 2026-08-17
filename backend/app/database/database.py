@@ -3,7 +3,6 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "sqlite:///emailshield.db",
@@ -24,9 +23,8 @@ Base = declarative_base()
 
 
 def init_db():
-    # Import models here to avoid circular imports
-    from app.models.email_report import EmailReport
-    from app.models.user import User
+    # Import models so SQLAlchemy registers all tables
+    from app.models import email_report, user  # noqa: F401
 
     Base.metadata.create_all(bind=engine)
 

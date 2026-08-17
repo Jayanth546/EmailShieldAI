@@ -1,6 +1,6 @@
-from typing import List, Optional, Dict, Any
+from typing import Any
 
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class EmailRequest(BaseModel):
@@ -12,27 +12,27 @@ class EmailRequest(BaseModel):
         max_length=320,
     )
 
-    message_id: Optional[str] = Field(
+    message_id: str | None = Field(
         default=None,
         max_length=512,
     )
 
-    reply_to: Optional[str] = Field(
+    reply_to: str | None = Field(
         default=None,
         max_length=320,
     )
 
-    authentication_results: Optional[str] = Field(
+    authentication_results: str | None = Field(
         default=None,
         max_length=4096,
     )
 
-    received_spf: Optional[str] = Field(
+    received_spf: str | None = Field(
         default=None,
         max_length=1024,
     )
 
-    dkim_signature: Optional[str] = Field(
+    dkim_signature: str | None = Field(
         default=None,
         max_length=8192,
     )
@@ -42,12 +42,12 @@ class EmailRequest(BaseModel):
         max_length=100_000,
     )
 
-    urls: List[str] = Field(
+    urls: list[str] = Field(
         default_factory=list,
         max_length=100,
     )
 
-    attachments: List[str] = Field(
+    attachments: list[str] = Field(
         default_factory=list,
         max_length=50,
     )
@@ -94,19 +94,19 @@ class RiskResponse(BaseModel):
     verdict: str
     rule_based_score: int
     spam_score: int
-    reasons: List[Dict[str, Any]]
-    details: Dict[str, Any]
+    reasons: list[dict[str, Any]]
+    details: dict[str, Any]
 
 
 class EmailAnalysisResponse(BaseModel):
-    header: Dict[str, Any]
-    url: Dict[str, Any]
-    body: Dict[str, Any]
-    attachment: Dict[str, Any]
-    authentication: Dict[str, Any]
-    spam: Dict[str, Any]
+    header: dict[str, Any]
+    url: dict[str, Any]
+    body: dict[str, Any]
+    attachment: dict[str, Any]
+    authentication: dict[str, Any]
+    spam: dict[str, Any]
     risk: RiskResponse
     risk_level: str
     total_score: int
-    report_id: Optional[int] = None
+    report_id: int | None = None
 
